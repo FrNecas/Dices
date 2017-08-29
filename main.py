@@ -8,17 +8,17 @@ class App:
         self.dice_count = 6
         self.put_away_dices = []
         self.turn_total = 0
-        self.dice_declination = {1: "kostka", 2: "kostky", 3: "kostky", 4: "kostky", 5: "kostek", 6: "kostek"}
-        self.zbyva_declination = {1: "zbývá", 2: "zbývají", 3: "zbývají", 4: "zbývají", 5: "zbývá", 6: "zbývá"}
+        self.dice_declination = {1: "dice", 2: "dices", 3: "dices", 4: "dices", 5: "dices", 6: "dices"}
+        # sets declination for sentences
 
     def roll_dices(self):
         result_of_roll = []
         for i in range(self.dice_count):
             result_of_roll.append(random.randrange(1, 7))
-        print("Hodil jste %s" % (", ".join(str(v) for v in result_of_roll)))
+        print("You rolled %s" % (", ".join(str(v) for v in result_of_roll)))
 
         indexes = []
-        for index, number in enumerate(result_of_roll):
+        for index, number in enumerate(result_of_roll):  # finds indexes of number 5 and puts them at the end of a list
             if number == 5:
                 indexes.append(index)
         for index, result in enumerate(indexes):
@@ -29,10 +29,10 @@ class App:
     def conclude(self, result_of_roll):
         before_turn = self.turn_total
         summary_of_result = {}
-        for result in result_of_roll:
+        for result in result_of_roll:  # makes a dict from a list
             summary_of_result[result] = 1 if result not in summary_of_result.keys() else summary_of_result[result] + 1
 
-        for key, value in summary_of_result.items():
+        for key, value in summary_of_result.items():  # concludes result according to game rules
             if value >= 3:
                 for i in range(value):
                     self.put_away_dices.append(key)
@@ -40,10 +40,10 @@ class App:
                 if key == 1:
                     self.turn_total += 100 * key * (2**(value-3))
                 else:
-                    self.turn_total += 10 * key * (2**(value-3))
+                    self.turn_total += 10 * key * (2**(value-3))  # calculation on points 10 * x (2**(a-3))
 
             elif len(summary_of_result) == 6:
-                print("Hodil jste řadu!")
+                print("You got a row and got 100 points!")
                 self.turn_total += 100
                 break
 
@@ -53,7 +53,7 @@ class App:
                     self.put_away_dices.append(key)
                     result_of_roll.remove(key)
 
-            elif key in self.put_away_dices:
+            elif key in self.put_away_dices:  # checks dices already put away
                 for i in range(value):
                     summary_of_putaway = {}
                     for dice in self.put_away_dices:
@@ -64,22 +64,24 @@ class App:
                         result_of_roll.remove(key)
                         self.put_away_dices.append(key)
 
-            elif key == 5 and value <= 3:
-                print("Máte %d bodů, zbývají vám kostky %s" % (self.turn_total, ", ".join(str(v) for v in result_of_roll)))
-                inp = input("Chcete odložit pětku? A/N")
-                if inp == "A" or inp == "a":
+        if 5 in summary_of_result.keys() and summary_of_result[5] <= 3:  # 5 condition is triggered
+                                                                        # after everything else is calculated
+            print("You have %d points and remaining dices %s" % (self.turn_total, ", ".join(str(v) for v in
+                                                                                            result_of_roll)))
+            inp = input("Do you want to put away 5? Y/N")
+            if inp == "Y" or inp == "y":
+                self.turn_total += 5
+                result_of_roll.remove(5)
+                self.put_away_dices.append("5")
+            if value == 2 and inp == "Y":
+                inp = input("Do you want to put away 2nd 5? Y/N")
+                if inp == "Y" or inp == "y":
                     self.turn_total += 5
                     result_of_roll.remove(5)
                     self.put_away_dices.append("5")
-                if value == 2 and inp == "A":
-                    inp = input("Chcete odložit i druhou pětku? A/N")
-                    if inp == "A" or inp == "a":
-                        self.turn_total += 5
-                        result_of_roll.remove(5)
-                        self.put_away_dices.append("5")
 
-        if before_turn == self.turn_total and 5 not in result_of_roll:
-            print("Bohužel se Vám nepoštěstilo, ztrácíte body z tohoto kola")
+        if before_turn == self.turn_total and 5 not in result_of_roll:  # if nothing has changed you lose
+            print("Unfortunately you were unlucky and you lose all points from this round")
             self.put_away_dices = []
             self.dice_count = 6
         else:
@@ -88,11 +90,9 @@ class App:
                 self.dice_count = 6
             else:
                 self.dice_count = 6 - len(self.put_away_dices)
-            inp = input("Máte %d bodů. %s vám %d %s. Chcete házet znovu? A/N" % (self.turn_total,
-                                                                                 self.zbyva_declination[self.dice_count],
-                                                                                 self.dice_count,
-                                                                                 self.dice_declination[self.dice_count]))
-            if inp == "A" or inp == "a":
+            inp = input("You have %d points. You have %d %s remaining. Do you want to roll again? Y/N" % (
+                self.turn_total, self.dice_count, self.dice_declination[self.dice_count]))
+            if inp == "Y" or inp == "y":
                 self.roll_dices()
             else:
                 self.total += self.turn_total
