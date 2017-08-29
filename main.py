@@ -73,7 +73,7 @@ class App:
                 self.turn_total += 5
                 result_of_roll.remove(5)
                 self.put_away_dices.append("5")
-            if value == 2 and inp == "Y":
+            if summary_of_result[5] == 2 and inp == "Y":
                 inp = input("Do you want to put away 2nd 5? Y/N")
                 if inp == "Y" or inp == "y":
                     self.turn_total += 5
