@@ -86,6 +86,7 @@ class App:
         if before_turn == self.turn_total and 5 not in result_of_roll:  # if nothing has changed you lose
             if player == "user":
                 print("Unfortunately you were unlucky and you lose all points from this round")
+                print(50 * "_")
             self.put_away_dices = []
             self.dice_count = 6
         else:
@@ -99,6 +100,7 @@ class App:
                 while not answered:
                     inp = input("You have %d points. You have %d %s remaining. Do you want to roll again? Y/N" % (
                         self.turn_total, self.dice_count, self.dice_declination[self.dice_count]))
+                    print(50 * "_")
                     if inp == "Y" or inp == "y":
                         answered = True
                         self.roll_dices(player)
@@ -113,9 +115,17 @@ class App:
 
 
 if __name__ == "__main__":
-    final_points = int(input("On how many points would you like the game to end?"))
+    answered = False
+    while not answered:
+        try:
+            final_points = int(input("On how many points would you like the game to end?"))
+            answered = True
+            print(50 * "=")
+        except ValueError:
+            print("Wrong input")
     dices = App()
     while dices.total < final_points and dices.opponent_total < final_points:
         dices.roll_dices("user")
         #dices.roll_dices("bot")
         print("Your opponent has %d points, you have %d points" % (dices.opponent_total, dices.total))
+        print(50 * "=")
