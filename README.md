@@ -1,10 +1,13 @@
-Game od Dices according to rules of our family.
+# Dices
+
+Game of Dices according to rules of our family.
+
 ____________________
 Version 2.0.1
 A whole game can be played against basic AI (not perfect tho)
 ____________________
 
-Rules:
+### Rules:
 
 You lose if you can't put away any dice and you haven't rolled a 5. If this happens you lose all your points from this round.
 
