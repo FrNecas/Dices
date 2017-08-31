@@ -1,7 +1,7 @@
 Game od Dices according to rules of our family.
 ____________________
-Version 1.0.0
-One round can be played
+Version 2.0.1
+A whole game can be played against basic AI (not perfect tho)
 ____________________
 
 Rules:
