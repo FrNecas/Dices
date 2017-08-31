@@ -36,7 +36,10 @@ class App:
         for key, value in summary_of_result.items():  # concludes result according to game rules
             if value >= 3:
                 for i in range(value):
-                    self.put_away_dices.append(key)
+                    if key != 1:  # condition to control whether 1 has been put away as 10 or 100
+                        self.put_away_dices.append(key)
+                    else:
+                        self.put_away_dices.append("1")
                     result_of_roll.remove(key)
                 if key == 1:
                     self.turn_total += 100 * key * (2**(value-3))
@@ -49,11 +52,21 @@ class App:
                 self.turn_total += 100
                 break
 
-            elif key == 1 and value <= 3:
+            elif key == 1 and value <= 3 and "1" not in self.put_away_dices:
                 self.turn_total += value * 10
                 for i in range(value):
                     self.put_away_dices.append(key)
                     result_of_roll.remove(key)
+
+            elif "1" in self.put_away_dices and 1 in result_of_roll:  # condition for 3 put away 1s at once
+                summary_of_putaway = {}
+                for dice in self.put_away_dices:
+                    summary_of_putaway[dice] = 1 if dice not in summary_of_putaway.keys() else summary_of_putaway[
+                                                                                                   dice] + 1
+                if summary_of_putaway["1"] > 2:
+                    self.turn_total += 100 * (2 ** (summary_of_putaway["1"] - 3))
+                    result_of_roll.remove(key)
+                    self.put_away_dices.append("1")
 
             elif key in self.put_away_dices:  # checks dices already put away
                 for i in range(value):
@@ -66,7 +79,7 @@ class App:
                         result_of_roll.remove(key)
                         self.put_away_dices.append(key)
 
-        if 5 in summary_of_result.keys() and summary_of_result[5] <= 3:  # 5 condition is triggered
+        if 5 in summary_of_result.keys() and summary_of_result[5] <= 2:  # 5 condition is triggered
                                                                         # after everything else is calculated
             if player == "user":
                 print("You have %d points and remaining dices %s" % (self.turn_total, ", ".join(str(v) for v in
@@ -76,25 +89,37 @@ class App:
                     self.turn_total += 5
                     result_of_roll.remove(5)
                     self.put_away_dices.append("5")
-                if summary_of_result[5] == 2 and inp == "Y":
+                if summary_of_result[5] == 2 and (inp == "Y" or inp == "y"):
                     inp = input("Do you want to put away 2nd 5? Y/N")
                     if inp == "Y" or inp == "y":
                         self.turn_total += 5
                         result_of_roll.remove(5)
                         self.put_away_dices.append("5")
+            else:
+                if len(result_of_roll) == 1:
+                    self.turn_total += 5
+                    result_of_roll.remove(5)
+                    self.put_away_dices.append("5")
+                if len(result_of_roll) == [5, 5]:
+                    self.turn_total += 10
+                    for i in range (2):
+                        result_of_roll.remove(5)
+                        self.put_away_dices.append("5")
+
+        if len(self.put_away_dices) == 6:
+            self.put_away_dices = []
+            self.dice_count = 6
+        else:
+            self.dice_count = 6 - len(self.put_away_dices)
 
         if before_turn == self.turn_total and 5 not in result_of_roll:  # if nothing has changed you lose
             if player == "user":
                 print("Unfortunately you were unlucky and you lose all points from this round")
                 print(50 * "_")
+            self.turn_total = 0
             self.put_away_dices = []
             self.dice_count = 6
         else:
-            if len(self.put_away_dices) == 6:
-                self.put_away_dices = []
-                self.dice_count = 6
-            else:
-                self.dice_count = 6 - len(self.put_away_dices)
             if player == "user":
                 answered = False
                 while not answered:
@@ -105,6 +130,7 @@ class App:
                         answered = True
                         self.roll_dices(player)
                     elif inp == "N" or inp == "n":
+                        answered = True
                         self.total += self.turn_total
                         self.turn_total = 0
                         self.dice_count = 6
@@ -112,6 +138,15 @@ class App:
                         return
                     else:
                         print("Wrong input")
+            else:
+                if self.dice_count in (4, 5, 6) or (len(self.put_away_dices) in (3, 4) and 100 >= self.turn_total >= 20):
+                    self.roll_dices(player)
+                elif self.turn_total >= 100:
+                    self.opponent_total += self.turn_total
+                    self.turn_total = 0
+                    self.dice_count = 6
+                    self.put_away_dices = []
+                    return
 
 
 if __name__ == "__main__":
@@ -126,6 +161,6 @@ if __name__ == "__main__":
     dices = App()
     while dices.total < final_points and dices.opponent_total < final_points:
         dices.roll_dices("user")
-        #dices.roll_dices("bot")
+        dices.roll_dices("bot")
         print("Your opponent has %d points, you have %d points" % (dices.opponent_total, dices.total))
         print(50 * "=")
