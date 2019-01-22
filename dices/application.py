@@ -149,18 +149,22 @@ class App:
                     return
 
 def main():
-    answered = False
-    while not answered:
-        try:
-            final_points = int(input("On how many points would you like the game to end?"))
-            answered = True
+    try:
+        answered = False
+        while not answered:
+            try:
+                final_points = int(input("On how many points would you like the game to end?"))
+                answered = True
+                print(50 * "=")
+            except ValueError:
+                print("Wrong input")
+        dices = App()
+        while dices.total < final_points and dices.opponent_total < final_points:
+            dices.roll_dices("user")
+            dices.roll_dices("bot")
+            print("Your opponent has %d points, you have %d points" % (dices.opponent_total, dices.total))
             print(50 * "=")
-        except ValueError:
-            print("Wrong input")
-    dices = App()
-    while dices.total < final_points and dices.opponent_total < final_points:
-        dices.roll_dices("user")
-        dices.roll_dices("bot")
-        print("Your opponent has %d points, you have %d points" % (dices.opponent_total, dices.total))
-        print(50 * "=")
+
+    except KeyboardInterrupt:
+        print("Terminated")
 
